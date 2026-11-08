@@ -1,1 +1,1 @@
-link to dashboard: [dashboard]()
+link to dashboard: [dashboard](https://eric-lefebvre.github.io/BI-td4-time-series/)
