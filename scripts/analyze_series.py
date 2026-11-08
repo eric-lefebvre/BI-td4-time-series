@@ -8,9 +8,9 @@ def load_series(path="data/series.csv"):
     with open(path) as f:
         rows = []
         for r in csv.DictReader(f):
-            if r["co2_ppm"] == "":
+            if r["pm2_5_ugm3"] == "":
                 continue  # a day with zero real hourly readings -- nothing to average
-            rows.append({"date": r["date"], "value": float(r["co2_ppm"])})
+            rows.append({"date": r["date"], "value": float(r["pm2_5_ugm3"])})
     return rows
 
 def clean_series(rows):
@@ -82,7 +82,7 @@ def main():
     raw = load_series()
     cleaned, gap_ranges, start = clean_series(raw)
 
-    print(f"Loaded {len(raw)} real daily CO2 readings "
+    print(f"Loaded {len(raw)} real daily PM2.5 readings "
           f"({raw[0]['date']} to {raw[-1]['date']}).")
     if gap_ranges:
         for seg_start, seg_end in gap_ranges:
@@ -104,26 +104,27 @@ def main():
     smoothed_exp = exponential_smoothing(values)
     projection, slope = linear_trend_projection(days, values, start)
 
-    print(f"\nLast 5 raw values (ppm):      {values[-5:]}")
-    print(f"Last 5 rolling-mean (ppm):    {smoothed_ma[-5:]}")
-    print(f"Last 5 exp-smoothed (ppm):    {smoothed_exp[-5:]}")
-    print(f"\nLinear trend slope: {slope:+.3f} ppm/day")
-    print(f"Projection (next {PROJECT_STEPS} days, ppm): {[p['value'] for p in projection]}")
+    print(f"\nLast 5 raw values (µg/m³):      {values[-5:]}")
+    print(f"Last 5 rolling-mean (µg/m³):    {smoothed_ma[-5:]}")
+    print(f"Last 5 exp-smoothed (µg/m³):    {smoothed_exp[-5:]}")
+    print(f"\nLinear trend slope: {slope:+.3f} µg/m³/day")
+    print(f"Projection (next {PROJECT_STEPS} days, µg/m³): {[p['value'] for p in projection]}")
 
     honest_note = (
         f"Projection covers {PROJECT_STEPS} days ahead from {len(cleaned)} days of "
-        f"real CO2 history ({len(gap_ranges)} known gap(s) in the source data). "
-        "This is a straight line through one seasonal window of real atmospheric "
-        "data -- CO2 has a well-known yearly cycle (lower in the Northern "
-        "Hemisphere's growing season, higher in winter), so a trend measured over "
-        "90 summer/autumn days should NOT be extrapolated across season boundaries. "
-        "Trust this projection only a few days out."
+        f"real PM2.5 history ({len(gap_ranges)} known gap(s) in the source data). "
+        "This is a straight line through very spiky data -- PM2.5 is driven by "
+        "short weather-dependent episodes (calm winds and temperature inversions "
+        "trap particles, rain and wind clear them) and tends to rise in winter "
+        "with residential heating, so a single 90-day trend line says little "
+        "about any specific day. Trust this projection only a few days out, as "
+        "a rough level, not as a forecast of pollution peaks."
     )
     print(f"\nHonesty note: {honest_note}")
 
     output = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "unit": "ppm",
+        "unit": "µg/m³",
         "raw": [{"day": c["day"], "date": c["date"], "value": c["value"]} for c in cleaned],
         "gaps": [
             {"start_day": s, "end_day": e,

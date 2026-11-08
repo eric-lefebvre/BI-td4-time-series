@@ -2,7 +2,7 @@ import csv, os, time
 import requests
 
 # Open-Meteo Air Quality API -- free, keyless, no registration, real hourly
-# atmospheric CO2 concentration (ppm) from a reanalysis+forecast model, not a
+# fine particulate matter PM2.5 (µg/m³) from a reanalysis+forecast model, not a
 # single physical sensor. past_days gives real history in ONE call (up to at
 # least 90 days, confirmed by real testing) -- no need to wait weeks for a
 # scheduled pipeline to accumulate data, unlike this course's other real-time-
@@ -11,10 +11,10 @@ LAT, LON = 48.3904, -4.4861  # Brest
 PAST_DAYS = 90
 URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 
-def fetch_hourly_co2(retries=4, backoff=5):
+def fetch_hourly_pm2_5(retries=4, backoff=5):
     params = {
         "latitude": LAT, "longitude": LON,
-        "hourly": "carbon_dioxide",
+        "hourly": "pm2_5",
         "past_days": PAST_DAYS,
         "forecast_days": 0,
         "timezone": "auto",
@@ -48,17 +48,17 @@ def aggregate_to_daily(times, values):
         real_hours = [h for h in hours if h is not None]
         rows.append({
             "date": day,
-            "co2_ppm": round(sum(real_hours) / len(real_hours), 1) if real_hours else "",
+            "pm2_5_ugm3": round(sum(real_hours) / len(real_hours), 1) if real_hours else "",
             "n_hours_observed": len(real_hours),
         })
     return rows
 
 def main():
-    print(f"Fetching {PAST_DAYS} days of real hourly CO2 (ppm) for Brest "
+    print(f"Fetching {PAST_DAYS} days of real hourly PM2.5 (µg/m³) for Brest "
           f"({LAT}, {LON}) from Open-Meteo Air Quality API...")
-    data = fetch_hourly_co2()
+    data = fetch_hourly_pm2_5()
     times = data["hourly"]["time"]
-    values = data["hourly"]["carbon_dioxide"]
+    values = data["hourly"]["pm2_5"]
     print(f"Received {len(times)} real hourly readings "
           f"({times[0]} to {times[-1]})")
 
@@ -71,7 +71,7 @@ def main():
 
     os.makedirs("data", exist_ok=True)
     with open("data/series.csv", "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["date", "co2_ppm", "n_hours_observed"])
+        w = csv.DictWriter(f, fieldnames=["date", "pm2_5_ugm3", "n_hours_observed"])
         w.writeheader()
         w.writerows(rows)
     print(f"Wrote data/series.csv ({len(rows)} days)")

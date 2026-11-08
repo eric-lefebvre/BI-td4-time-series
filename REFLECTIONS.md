@@ -58,3 +58,12 @@ They would go stale with last week's numbers because fetch_hourly_co2() raises a
 > you pick using what you know about the underlying process, not just eyeball it.
 
 7 to 14 days looks like a decent number of days. On my current graph, CO2 levels seem to be rising increadibly fast. I dont know the minimum and maximum of ppm CO2 can reach throughout the year so my guess could be way off but I think the current 7-days slow slope is a decent guess of what might happen in the next 7 days. It's most likely a bit underevaluating, and doesnt take enough into account the recent increase that happened over the last 5 days.
+
+## Stage 6 — On your own: a different location, or a different variable
+> **Reflection 7.** You changed one line (a location or a variable) and the entire
+> pipeline — cleaning, smoothing, projection, dashboard — kept working with no other
+> changes needed. Why was that possible? Point to the specific reason in
+> `analyze_series.py`'s own functions (what do they NOT mention, that let them stay
+> generic?).
+
+This function only takes dates and values, it doesnt change based on the location or the data type, so the whole pipeline can still function correctly if I change the location and type of data that is fed to it.
