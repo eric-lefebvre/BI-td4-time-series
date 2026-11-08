@@ -1,43 +1,18 @@
-# REFLECTIONS — TD4 : séries temporelles
+## Stage 0 — Framing (CM3: Modern Data Acquisition, CM4: Automated Pipelines)
+**Reflection 1.** The synthetic-data plan was reasonable-sounding and wrong. Before
+reading further: what would you have had to do to *check* whether real historical
+CO2 data was available, instead of just assuming it wasn't? Name one concrete
+action. (This is CM3's acquisition-planning discipline in miniature: an assumption
+about what data is available is itself a claim that needs checking, not something
+to design around unverified.)
 
-## Stage 0 — Framing
+Send one test request to the API with `past_days=90` (or just read the `past_days` parameter in the Air Quality API docs) and look at whether it really returns 90 days of hourly values. It takes five minutes, way less than designing a whole synthetic data generator around an assumption nobody checked.
 
-**Reflection 1.** Il aurait suffi de faire une seule requête de test vers l'API avant
-de concevoir quoi que ce soit : ouvrir dans le navigateur
-`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=48.0061&longitude=0.1996&hourly=carbon_dioxide&past_days=90`
-(ou lire le paramètre `past_days` dans la documentation de l'Air Quality API) et regarder
-si la réponse contenait bien 90 jours de valeurs horaires non nulles. Cette vérification
-prend cinq minutes, alors que l'hypothèse « pas d'historique réel disponible » a orienté
-toute la conception (données synthétiques). Une hypothèse sur la disponibilité des données
-doit être testée comme n'importe quelle affirmation, pas servir de point de départ à la conception.
+## Stage 1 — Collection (CM3: acquisition patterns, provenance)
+**Reflection 2.** Before running the script below: the location is fixed to Le Mans
+(48.0061, 0.1996). Based on what you know about seasons and plant growth, do you
+expect atmospheric CO2 there to be *rising*, *falling*, or *flat* over the last 90
+days from today? Write your prediction down before you look at your own output —
+you'll check it in Stage 3.
 
-## Stage 1 — Collection
-
-**Reflection 2.** *Prédiction faite avant d'exécuter le script (le 2026-11-08) :* je m'attends
-à ce que le CO2 au Mans soit **en hausse** sur les 90 derniers jours (de mi-août à début
-novembre). Dans l'hémisphère Nord, la photosynthèse de la végétation fait baisser le CO2
-pendant la saison de croissance, avec un minimum vers fin août-septembre. Ensuite, la chute
-des feuilles, la décomposition et le début du chauffage le font remonter jusqu'au printemps.
-Comme la fenêtre commence près de ce minimum, la pente devrait être positive, de l'ordre de
-quelques dixièmes de ppm par jour, avec un bruit journalier non négligeable lié à la météo
-locale (vent, couche limite). Vérification au Stage 3.
-
-## Stage 2 — Cleaning
-
-**Reflection 3.** _À compléter._
-
-## Stage 3 — Modeling
-
-**Reflection 4.** _À compléter._
-
-## Stage 4 — Storage
-
-**Reflection 5.** _À compléter._
-
-## Stage 5 — Visualization
-
-**Reflection 6.** _À compléter._
-
-## Stage 6 — On your own
-
-**Reflection 7.** _À compléter._
+I expect CO2 to be rising. The last 90 days go from mid-August to early November: plants absorb CO2 during summer, so the minimum is around late August/September, then it goes back up in autumn when leaves fall and decompose and people start heating. I expect a small slope (a few tenths of ppm per day) with some day-to-day noise from the weather.
